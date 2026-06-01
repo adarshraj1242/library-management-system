@@ -1,0 +1,287 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Manage Students - Horizon Library Admin</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        if(!localStorage.getItem('admin_user')) window.location.href = '/index.html';
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.body.classList.add('dark-theme');
+            }
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                if (document.body.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+    <div class="top-navbar" style="background:var(--secondary); border-bottom:1px solid rgba(255,255,255,0.1);">
+        <div class="brand" style="display:flex; align-items:center; gap:10px;">
+            <div style="background:var(--primary); padding:8px; border-radius:10px; display:flex;">👤</div>
+            Horizon Admin - Students
+        </div>
+        <div style="display:flex; align-items:center; gap:15px;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <button onclick="goBack()" style="background:rgba(255,255,255,0.1); color:white; border:none; padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">← Back</button>
+            <button onclick="logout()" style="background:rgba(239,68,68,0.1); color:#ef4444; border:1px solid rgba(239,68,68,0.2); padding:8px 16px; border-radius:6px; cursor:pointer; font-weight:600;">Logout</button>
+        </div>
+    </div>
+
+    <div class="container-main">
+        <div class="dashboard-content" style="width:100%;">
+            <div style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:2rem;">
+                <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:2rem;">
+                    <h2 style="font-size:1.6rem; font-weight:900; color:var(--secondary); margin:0;">👥 Registered Students</h2>
+                    <button onclick="openAddStudentForm()" class="btn" style="padding:12px 25px; display:flex; align-items:center; gap:8px;">➕ Register Student</button>
+                </div>
+
+                <!-- Add Student Form -->
+                <div id="addStudentForm" style="display:none; background:#f8f9fa; padding:1.5rem; border-radius:10px; margin-bottom:2rem; border:1px solid var(--border);">
+                    <h3 style="color:var(--secondary); margin-top:0;">Register New Student</h3>
+                    <form onsubmit="submitAddStudent(event)">
+                        <div style="display:grid; grid-template-columns: 1fr 1fr; gap:1.5rem;">
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:8px;">Full Name *</label>
+                                <input type="text" id="studentName" placeholder="Enter student name" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:8px;">Email Address *</label>
+                                <input type="email" id="studentEmail" placeholder="student@example.com" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:8px;">Phone Number *</label>
+                                <input type="tel" id="studentPhone" placeholder="Enter phone number" required style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                            </div>
+                            <div>
+                                <label style="font-weight:600; display:block; margin-bottom:8px;">Date of Birth (Year)</label>
+                                <input type="text" id="studentDob" placeholder="1999" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                            </div>
+                        </div>
+                        <div style="margin-top:1.5rem; display:flex; gap:1rem;">
+                            <button type="submit" class="btn" style="flex:1; padding:12px;">✅ Register & Generate Password</button>
+                            <button type="button" class="btn" style="flex:1; padding:12px; background:#f3f4f6; color:var(--secondary);" onclick="closeAddStudentForm()">❌ Cancel</button>
+                        </div>
+                        <div id="generatedPassword" style="display:none; margin-top:1rem; padding:1rem; background:#d1fae5; border-radius:8px; color:#065f46;">
+                            <strong>Generated Password:</strong> <code id="genPassDisplay" style="background:#f0fdf4; padding:4px 8px; border-radius:4px; display:inline-block; margin-top:5px;"></code>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Students Table -->
+                <div style="overflow-x:auto;">
+                    <table style="width:100%; border-collapse:collapse;">
+                        <thead style="background:#f8f9fa; border-bottom:2px solid var(--border);">
+                            <tr>
+                                <th style="padding:12px; text-align:left; font-weight:700; color:var(--secondary);">ID</th>
+                                <th style="padding:12px; text-align:left; font-weight:700; color:var(--secondary);">Name</th>
+                                <th style="padding:12px; text-align:left; font-weight:700; color:var(--secondary);">Email</th>
+                                <th style="padding:12px; text-align:left; font-weight:700; color:var(--secondary);">Phone</th>
+                                <th style="padding:12px; text-align:center; font-weight:700; color:var(--secondary);">Fine</th>
+                                <th style="padding:12px; text-align:center; font-weight:700; color:var(--secondary);">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsTableBody">
+                            <!-- Students loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Fine Update Modal -->
+            <div id="fineModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; display:flex; align-items:center; justify-content:center;">
+                <div style="background:white; padding:2rem; border-radius:var(--radius-md); max-width:400px; width:90%;">
+                    <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:1rem;">Update Fine Amount</h3>
+                    <div style="margin-bottom:1.5rem;">
+                        <label style="font-weight:600; display:block; margin-bottom:8px;">Student: <span id="fineStudentName" style="color:var(--primary);"></span></label>
+                        <label style="font-weight:600; display:block; margin-bottom:8px; margin-top:1rem;">New Fine Amount (₹)</label>
+                        <input type="number" id="fineAmount" step="0.01" min="0" placeholder="0.00" style="width:100%; padding:10px; border-radius:8px; border:1px solid var(--border);">
+                    </div>
+                    <div style="display:flex; gap:1rem;">
+                        <button onclick="saveFine()" class="btn" style="flex:1;">✅ Update</button>
+                        <button onclick="closeFineModal()" class="btn" style="flex:1; background:#f3f4f6; color:var(--secondary);">❌ Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="message" style="display:none; padding:1rem; border-radius:10px; font-weight:600; margin-bottom:2rem;"></div>
+        </div>
+    </div>
+
+    <script>
+        let selectedStudentId = null;
+
+        function logout() { localStorage.clear(); window.location.href = '/'; }
+        function goBack() {
+            window.location.href = '/admin.html';
+        }
+
+        async function loadStudents() {
+            try {
+                const response = await fetch('/api/students');
+                if (response.ok) {
+                    const students = await response.json();
+                    displayStudentsTable(students);
+                }
+            } catch (error) {
+                showMessage('Error loading students: ' + error.message, 'error');
+            }
+        }
+
+        function displayStudentsTable(students) {
+            const tbody = document.getElementById('studentsTableBody');
+            tbody.innerHTML = '';
+
+            students.forEach(student => {
+                const row = document.createElement('tr');
+                row.style.cssText = 'border-bottom:1px solid var(--border);';
+                row.innerHTML = `
+                    <td style="padding:12px; color:var(--secondary); font-weight:700;">#${student.id}</td>
+                    <td style="padding:12px; color:var(--secondary); font-weight:600;">${student.name}</td>
+                    <td style="padding:12px; color:var(--text-muted);">${student.email}</td>
+                    <td style="padding:12px; color:var(--text-muted);">${student.phone}</td>
+                    <td style="padding:12px; text-align:center; color:${student.fines > 0 ? '#dc2626' : '#10b981'}; font-weight:700;">₹${(student.fines || 0).toFixed(2)}</td>
+                    <td style="padding:12px; text-align:center;">
+                        <button onclick="openFineModal(${student.id}, '${student.name}')" style="background:#fef3c7; color:#92400e; border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600; margin-right:5px;">💰 Fine</button>
+                        <button onclick="editPassword(${student.id})" style="background:var(--primary-light); color:var(--primary); border:none; padding:6px 12px; border-radius:6px; cursor:pointer; font-weight:600;">🔐 Pass</button>
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function openAddStudentForm() {
+            document.getElementById('addStudentForm').style.display = 'block';
+        }
+
+        function closeAddStudentForm() {
+            document.getElementById('addStudentForm').style.display = 'none';
+            document.getElementById('studentName').value = '';
+            document.getElementById('studentEmail').value = '';
+            document.getElementById('studentPhone').value = '';
+            document.getElementById('studentDob').value = '';
+            document.getElementById('generatedPassword').style.display = 'none';
+        }
+
+        async function submitAddStudent(e) {
+            e.preventDefault();
+
+            try {
+                const response = await fetch('/api/students', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        name: document.getElementById('studentName').value,
+                        email: document.getElementById('studentEmail').value,
+                        phone: document.getElementById('studentPhone').value,
+                        dob: document.getElementById('studentDob').value || new Date().getFullYear()
+                    })
+                });
+
+                if (response.ok) {
+                    const data = await response.json();
+                    showMessage('✅ Student registered successfully!', 'success');
+                    document.getElementById('genPassDisplay').innerText = data.generated_password;
+                    document.getElementById('generatedPassword').style.display = 'block';
+                    setTimeout(() => {
+                        closeAddStudentForm();
+                        loadStudents();
+                    }, 2000);
+                } else {
+                    showMessage('❌ Failed to register student', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function openFineModal(studentId, studentName) {
+            selectedStudentId = studentId;
+            document.getElementById('fineStudentName').innerText = studentName;
+            document.getElementById('fineAmount').value = '';
+            document.getElementById('fineModal').style.display = 'flex';
+        }
+
+        function closeFineModal() {
+            document.getElementById('fineModal').style.display = 'none';
+            selectedStudentId = null;
+        }
+
+        async function saveFine() {
+            if (!selectedStudentId) return;
+
+            try {
+                const response = await fetch('/api/students', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        action: 'update_fine',
+                        student_id: selectedStudentId,
+                        fine: document.getElementById('fineAmount').value
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('✅ Fine updated successfully!', 'success');
+                    closeFineModal();
+                    setTimeout(() => loadStudents(), 1000);
+                } else {
+                    showMessage('❌ Failed to update fine', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function editPassword(studentId) {
+            alert('Password update for student ID: ' + studentId + ' (Coming soon!)');
+        }
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = msg;
+            msgDiv.style.display = 'block';
+            msgDiv.style.background = type === 'success' ? '#d1fae5' : '#fee2e2';
+            msgDiv.style.color = type === 'success' ? '#065f46' : '#7f1d1d';
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load students on page load
+        document.addEventListener('DOMContentLoaded', loadStudents);
+    </script>
+</body>
+</html>

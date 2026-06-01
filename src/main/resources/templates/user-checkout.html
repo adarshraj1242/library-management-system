@@ -1,0 +1,249 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Book Catalog & Checkout - Horizon Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        if(!localStorage.getItem('patron_id')) window.location.href = '/index.html';
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.body.classList.add('dark-theme');
+            }
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                if (document.body.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+    <div class="top-navbar">
+        <div class="brand">
+            <div style="background:var(--primary); padding:8px; border-radius:12px; display:flex;">📖</div>
+            Horizon <span style="color:var(--primary)">Digital</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <button onclick="goBack()" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; transition:0.3s;">← Back</button>
+            <button onclick="logout()" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; transition:0.3s;">Logout</button>
+        </div>
+    </div>
+
+    <div class="container-main">
+        <div class="dashboard-content" style="width:100%;">
+            <div style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border); margin-bottom:2rem;">
+                <h2 style="font-size:1.8rem; font-weight:900; color:var(--secondary); margin-bottom:1rem;">📚 Browse Catalog</h2>
+                
+                <div style="display:flex; gap:1rem; align-items:flex-end; margin-bottom:2rem;">
+                    <div style="flex:1;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Search Books</label>
+                        <input type="text" id="searchQuery" placeholder="Search by title, author..." style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                    </div>
+                    <div style="flex:0.8;">
+                        <label style="display:block; font-size:0.75rem; font-weight:800; color:var(--text-muted); margin-bottom:8px; text-transform:uppercase;">Category</label>
+                        <select id="categoryFilter" style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border);">
+                            <option value="">All Categories</option>
+                            <option value="Classic">Classic</option>
+                            <option value="Romance">Romance</option>
+                            <option value="Dystopian">Dystopian</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Science">Science</option>
+                            <option value="Technology">Technology</option>
+                        </select>
+                    </div>
+                    <button onclick="searchBooks()" class="btn" style="padding:12px 30px;">🔍 Search</button>
+                </div>
+            </div>
+
+            <!-- Books Grid -->
+            <div id="booksContainer" style="display:grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap:2rem; margin-bottom:3rem;">
+                <!-- Books loaded here -->
+            </div>
+
+            <!-- Checkout Modal -->
+            <div id="checkoutModal" style="display:none; position:fixed; top:0; left:0; right:0; bottom:0; background:rgba(0,0,0,0.7); z-index:1000; flex-items:center; justify-content:center;">
+                <div style="background:white; padding:2rem; border-radius:var(--radius-md); max-width:400px; width:90%;">
+                    <h3 style="font-size:1.3rem; font-weight:900; margin-bottom:1rem;">Checkout Book?</h3>
+                    <div id="checkoutInfo"></div>
+                    <div style="display:flex; gap:1rem; margin-top:2rem;">
+                        <button onclick="confirmCheckout()" class="btn" style="flex:1;">✅ Checkout</button>
+                        <button onclick="closeCheckoutModal()" class="btn" style="flex:1; background:#f3f4f6; color:var(--secondary);">❌ Cancel</button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="message" style="display:none; position:fixed; bottom:20px; right:20px; background:white; padding:1.5rem; border-radius:10px; box-shadow:0 8px 25px rgba(0,0,0,0.15); z-index:1001; max-width:400px;"></div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let allBooks = [];
+        let selectedBook = null;
+
+        function goBack() {
+            window.location.href = '/user.html';
+        }
+
+        async function loadAllBooks() {
+            try {
+                const response = await fetch('/api/books');
+                if (response.ok) {
+                    allBooks = await response.json();
+                    displayBooks(allBooks);
+                }
+            } catch (error) {
+                showMessage('Error loading books: ' + error.message, 'error');
+            }
+        }
+
+        function displayBooks(books) {
+            const container = document.getElementById('booksContainer');
+            container.innerHTML = '';
+            
+            if (books.length === 0) {
+                container.innerHTML = '<div style="grid-column: 1/-1; text-align:center; padding:3rem; color:var(--text-muted);">No books found</div>';
+                return;
+            }
+
+            books.forEach(book => {
+                const bookDiv = document.createElement('div');
+                bookDiv.style.cssText = 'background:white; border:1px solid var(--border); border-radius:var(--radius-md); overflow:hidden; cursor:pointer; transition:0.3s; hover:box-shadow: 0 8px 25px rgba(0,0,0,0.1);';
+                
+                const available = book.availableCopies > 0;
+                const availColor = available ? '#10b981' : '#ef4444';
+                const availText = available ? `${book.availableCopies} Available` : 'Out of Stock';
+
+                bookDiv.innerHTML = `
+                    <div style="background:var(--gradient); height:200px; position:relative; display:flex; align-items:center; justify-content:center; font-size:3rem; color:white;">
+                        📚
+                    </div>
+                    <div style="padding:1.2rem;">
+                        <h4 style="font-weight:800; margin:0 0 0.3rem; color:var(--secondary); font-size:1rem;">${book.title}</h4>
+                        <div style="font-size:0.85rem; color:var(--text-muted); margin-bottom:0.5rem;">by ${book.author}</div>
+                        <div style="font-size:0.75rem; color:var(--text-muted); margin-bottom:1rem;">${book.category}</div>
+                        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:1rem;">
+                            <span style="font-size:0.8rem; font-weight:700; background:${available ? '#d1fae5' : '#fee2e2'}; color:${availColor}; padding:4px 8px; border-radius:4px;">${availText}</span>
+                            <span style="font-size:0.75rem; color:var(--text-muted);">${book.publicationYear}</span>
+                        </div>
+                        <button onclick="selectBook(${book.id})" class="btn" style="width:100%; padding:10px; font-size:0.9rem; ${available ? '' : 'opacity:0.5; cursor:not-allowed;'}">${available ? '📖 Checkout' : 'Not Available'}</button>
+                    </div>
+                `;
+                
+                container.appendChild(bookDiv);
+            });
+        }
+
+        function searchBooks() {
+            const query = document.getElementById('searchQuery').value.toLowerCase();
+            const category = document.getElementById('categoryFilter').value;
+
+            let filtered = allBooks.filter(book => {
+                const matchesSearch = book.title.toLowerCase().includes(query) || 
+                                    book.author.toLowerCase().includes(query);
+                const matchesCategory = category === '' || book.category === category;
+                return matchesSearch && matchesCategory;
+            });
+
+            displayBooks(filtered);
+        }
+
+        function selectBook(bookId) {
+            const book = allBooks.find(b => b.id === bookId);
+            if (book && book.availableCopies > 0) {
+                selectedBook = book;
+                document.getElementById('checkoutInfo').innerHTML = `
+                    <div style="margin-bottom:1rem;">
+                        <strong style="color:var(--secondary);">${book.title}</strong><br>
+                        Author: ${book.author}<br>
+                        Category: ${book.category}<br>
+                        <div style="margin-top:1rem; padding:1rem; background:#f8f9fa; border-radius:8px; color:var(--text-muted); font-size:0.9rem;">
+                            📅 You will have <strong>14 days</strong> to return this book.<br>
+                            📌 Fine: ₹5 per day if overdue.
+                        </div>
+                    </div>
+                `;
+                document.getElementById('checkoutModal').style.display = 'flex';
+            }
+        }
+
+        function closeCheckoutModal() {
+            document.getElementById('checkoutModal').style.display = 'none';
+            selectedBook = null;
+        }
+
+        async function confirmCheckout() {
+            if (!selectedBook) return;
+
+            const patronId = localStorage.getItem('patron_id');
+            
+            try {
+                const response = await fetch('/api/issues', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        student_id: patronId,
+                        book_id: selectedBook.id
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage(`✅ Request submitted for "${selectedBook.title}"! Admin will review it shortly.`, 'success');
+                    closeCheckoutModal();
+                    setTimeout(() => loadAllBooks(), 1000);
+                } else {
+                    showMessage('❌ Request failed', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerHTML = msg;
+            msgDiv.style.display = 'block';
+            msgDiv.style.background = type === 'success' ? '#d1fae5' : '#fee2e2';
+            msgDiv.style.color = type === 'success' ? '#065f46' : '#7f1d1d';
+            msgDiv.style.border = `1px solid ${type === 'success' ? '#a7f3d0' : '#fecaca'}`;
+            
+            setTimeout(() => {
+                msgDiv.style.display = 'none';
+            }, 3000);
+        }
+
+        // Load books on page load
+        document.addEventListener('DOMContentLoaded', loadAllBooks);
+    </script>
+</body>
+</html>

@@ -1,0 +1,418 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon Library | Premium Digital Portal</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/landing.css">
+    <!-- Font Awesome for Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    
+    <!-- Theme Toggle Button -->
+    <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+        <i class="fa-solid fa-sun"></i>
+    </button>
+
+    <!-- 1. HERO SECTION -->
+    <section class="hero" id="home">
+        <!-- Animated Blobs -->
+        <div class="hero-blob blob-1"></div>
+        <div class="hero-blob blob-2"></div>
+        
+        <div class="container">
+            <div class="hero-content">
+                <!-- Left Side: Branding -->
+                <div class="hero-left fade-in-up">
+                    <div class="logo-icon">
+                        <svg viewBox="0 0 24 24" width="40" height="40" stroke="white" stroke-width="2" fill="none" stroke-linecap="round" stroke-linejoin="round">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                            <path d="M6.5 2L6.5 22"></path>
+                        </svg>
+                    </div>
+                    <h1>Horizon <span class="text-gradient-accent">Library</span></h1>
+                    <p>Welcome to your gateway of infinite knowledge. A premium sanctuary for digital and physical discovery.</p>
+                    
+                    <div class="mini-cards">
+                        <div class="mini-card">
+                            <i class="fa-solid fa-book text-gradient-primary"></i>
+                            <span>10K+ Books</span>
+                        </div>
+                        <div class="mini-card">
+                            <i class="fa-solid fa-laptop-code text-gradient-accent"></i>
+                            <span>E-Library</span>
+                        </div>
+                        <div class="mini-card">
+                            <i class="fa-solid fa-lock text-gradient-primary"></i>
+                            <span>24/7 Access</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Right Side: Login -->
+                <div class="hero-right fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="glass-card login-card">
+                        <h3>Secure Portal</h3>
+                        
+                        <div class="tabs">
+                            <div class="tab active" data-target="patron-form" onclick="switchTab(this)">User Access</div>
+                            <div class="tab" data-target="admin-form" onclick="switchTab(this)">Admin Master</div>
+                        </div>
+
+                        <div id="patron-form" class="login-form active">
+                            <form onsubmit="handleLogin(event, 'patron_login')">
+                                <div class="input-group">
+                                    <label>Library Card / Email</label>
+                                    <input type="text" id="p_email" placeholder="Enter your ID" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Passcode</label>
+                                    <input type="password" id="p_pass" placeholder="••••••••" required>
+                                </div>
+                                <button type="submit" class="btn-submit">Initialize Session</button>
+                            </form>
+                        </div>
+
+                        <div id="admin-form" class="login-form">
+                            <form onsubmit="handleLogin(event, 'admin_login')">
+                                <div class="input-group">
+                                    <label>Admin ID</label>
+                                    <input type="text" id="a_user" placeholder="Root username" required>
+                                </div>
+                                <div class="input-group">
+                                    <label>Access Key</label>
+                                    <input type="password" id="a_pass" placeholder="••••••••" required>
+                                </div>
+                                <button type="submit" class="btn-submit">Admin Override</button>
+                            </form>
+                        </div>
+
+                        <p id="error-msg" style="display:none;"></p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 2. TRUST / STATS SECTION -->
+    <section class="stats-section" id="stats">
+        <div class="container">
+            <div class="stats-grid">
+                <div class="stat-card glass-card fade-in-up">
+                    <div class="stat-value text-gradient-primary">10,000+</div>
+                    <div class="stat-label">Books Available</div>
+                </div>
+                <div class="stat-card glass-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="stat-value text-gradient-accent">5,000+</div>
+                    <div class="stat-label">Active Students</div>
+                </div>
+                <div class="stat-card glass-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="stat-value text-gradient-primary">24/7</div>
+                    <div class="stat-label">Digital Access</div>
+                </div>
+                <div class="stat-card glass-card fade-in-up" style="animation-delay: 0.3s;">
+                    <div class="stat-value text-gradient-accent">99.9%</div>
+                    <div class="stat-label">Secure Portal</div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 3. FEATURES SECTION -->
+    <section class="features-section" id="features">
+        <div class="container">
+            <h2 class="section-title fade-in-up">Why Choose Horizon Library?</h2>
+            
+            <div class="features-grid">
+                <div class="feature-card glass-card fade-in-up">
+                    <div class="feature-icon"><i class="fa-solid fa-magnifying-glass"></i></div>
+                    <h4>Smart Book Search</h4>
+                    <p>Instantly locate physical and digital resources across our entire university catalog.</p>
+                </div>
+                <div class="feature-card glass-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="feature-icon"><i class="fa-solid fa-book-open-reader"></i></div>
+                    <h4>Digital Reader Access</h4>
+                    <p>Read e-books directly through our secure platform without needing third-party apps.</p>
+                </div>
+                <div class="feature-card glass-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="feature-icon"><i class="fa-solid fa-clock-rotate-left"></i></div>
+                    <h4>Borrow & Return Tracking</h4>
+                    <p>Keep a real-time log of your active borrows, due dates, and past reading history.</p>
+                </div>
+                <div class="feature-card glass-card fade-in-up">
+                    <div class="feature-icon"><i class="fa-solid fa-chart-line"></i></div>
+                    <h4>Admin Dashboard</h4>
+                    <p>Comprehensive tools for librarians to manage inventory, students, and active loans.</p>
+                </div>
+                <div class="feature-card glass-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="feature-icon"><i class="fa-solid fa-circle-check"></i></div>
+                    <h4>Real-Time Availability</h4>
+                    <p>Know immediately if a book is on the shelf or checked out before visiting.</p>
+                </div>
+                <div class="feature-card glass-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="feature-icon"><i class="fa-solid fa-user-graduate"></i></div>
+                    <h4>Student Profile</h4>
+                    <p>A dedicated space for students to manage their library account and preferences.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 4. SHOWCASE SECTION -->
+    <section class="showcase-section" id="showcase">
+        <div class="container fade-in-up">
+            <h2 class="section-title">Experience the Future of Learning</h2>
+            <p style="color: #9CA3AF; max-width: 600px; margin: 0 auto;">Our dashboard provides a seamless and intuitive experience for discovering new knowledge.</p>
+            
+            <div class="dashboard-mockup">
+                <div class="mockup-header">
+                    <div class="mockup-dot"></div>
+                    <div class="mockup-dot"></div>
+                    <div class="mockup-dot"></div>
+                </div>
+                <div class="mockup-body">
+                    <div class="mockup-sidebar">
+                        <div style="height:20px; background:rgba(255,255,255,0.1); border-radius:5px; margin-bottom:15px; width:80%;"></div>
+                        <div style="height:20px; background:rgba(255,255,255,0.1); border-radius:5px; margin-bottom:15px; width:70%;"></div>
+                        <div style="height:20px; background:rgba(255,255,255,0.1); border-radius:5px; margin-bottom:15px; width:90%;"></div>
+                    </div>
+                    <div class="mockup-main">
+                        <div class="mockup-search"></div>
+                        <div class="mockup-cards">
+                            <div class="mockup-card-item"></div>
+                            <div class="mockup-card-item"></div>
+                            <div class="mockup-card-item"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 5. HOW IT WORKS SECTION -->
+    <section class="how-it-works-section" id="how-it-works">
+        <div class="container">
+            <h2 class="section-title fade-in-up">How It Works</h2>
+            
+            <div class="timeline">
+                <div class="step-card fade-in-up">
+                    <div class="step-number">1</div>
+                    <h4>Login Securely</h4>
+                    <p>Enter your student credentials or admin master key to access your personalized portal.</p>
+                </div>
+                <div class="step-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="step-number">2</div>
+                    <h4>Search & Borrow</h4>
+                    <p>Browse our extensive catalog, check availability, and issue books with a single click.</p>
+                </div>
+                <div class="step-card fade-in-up" style="animation-delay: 0.4s;">
+                    <div class="step-number">3</div>
+                    <h4>Read Anywhere</h4>
+                    <p>Access e-books instantly or pick up physical copies. Track everything from your dashboard.</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 6. TESTIMONIAL SECTION -->
+    <section class="testimonial-section" id="testimonials">
+        <div class="container">
+            <h2 class="section-title fade-in-up" style="text-align: center;">What Students Say</h2>
+            
+            <div class="testimonials-grid">
+                <div class="testimonial-card glass-card fade-in-up">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Best college library portal ever. The interface is incredibly smooth and finding books takes seconds."</p>
+                    <div class="author">
+                        <div class="author-avatar"><img src="https://ui-avatars.com/api/?name=Sarah+J&background=5B5FFF&color=fff" alt="Sarah J" style="width:100%; height:100%;"></div>
+                        <div class="author-info">
+                            <h5>Sarah Jenkins</h5>
+                            <p>Computer Science, Junior</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass-card fade-in-up" style="animation-delay: 0.1s;">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"The easy issue-return system completely changed how I manage my coursework reading."</p>
+                    <div class="author">
+                        <div class="author-avatar"><img src="https://ui-avatars.com/api/?name=Michael+T&background=FF2D8D&color=fff" alt="Michael T" style="width:100%; height:100%;"></div>
+                        <div class="author-info">
+                            <h5>Michael Torres</h5>
+                            <p>Business Admin, Senior</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="testimonial-card glass-card fade-in-up" style="animation-delay: 0.2s;">
+                    <div class="stars">★★★★★</div>
+                    <p class="testimonial-text">"Digital reading made simple. I don't even have to carry heavy textbooks anymore!"</p>
+                    <div class="author">
+                        <div class="author-avatar"><img src="https://ui-avatars.com/api/?name=Emily+R&background=10B981&color=fff" alt="Emily R" style="width:100%; height:100%;"></div>
+                        <div class="author-info">
+                            <h5>Emily Rossi</h5>
+                            <p>Literature, Sophomore</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 7. CTA SECTION -->
+    <section class="cta-section">
+        <div class="container fade-in-up">
+            <div class="cta-banner">
+                <h2>Start Your Smart Library Journey Today</h2>
+                <p>Join thousands of students accessing infinite knowledge through Horizon Library.</p>
+                <div class="cta-buttons">
+                    <a href="#home" class="btn-white">Explore Catalog</a>
+                    <a href="#home" class="btn-outline-white" onclick="document.querySelectorAll('.tab')[1].click();">Admin Access</a>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- 8. FOOTER -->
+    <footer class="footer">
+        <div class="container">
+            <div class="footer-top">
+                <div class="footer-logo">
+                    <div class="footer-icon">
+                        <svg viewBox="0 0 24 24" width="20" height="20" stroke="white" stroke-width="2" fill="none">
+                            <path d="M4 19.5v-15A2.5 2.5 0 0 1 6.5 2H20v20H6.5a2.5 2.5 0 0 1 0-5H20"></path>
+                            <path d="M6.5 2L6.5 22"></path>
+                        </svg>
+                    </div>
+                    Horizon Library
+                </div>
+                <div class="footer-links">
+                    <a href="#home">Home</a>
+                    <a href="#features">Features</a>
+                    <a href="#home">Login</a>
+                    <a href="#showcase">Dashboard</a>
+                </div>
+                <div class="footer-social">
+                    <a href="#"><i class="fa-brands fa-twitter"></i></a>
+                    <a href="#"><i class="fa-brands fa-github"></i></a>
+                    <a href="#"><i class="fa-brands fa-linkedin-in"></i></a>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                &copy; 2026 Horizon Library. All rights reserved. Built for excellence.
+            </div>
+        </div>
+    </footer>
+
+    <!-- SCRIPTS -->
+    <script>
+        // Theme Toggle Logic
+        const themeToggleBtn = document.getElementById('theme-toggle');
+        const themeIcon = themeToggleBtn.querySelector('i');
+        const body = document.body;
+
+        // Check local storage or system preference
+        const savedTheme = localStorage.getItem('theme');
+        const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+        
+        if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+            body.classList.add('dark-theme');
+            themeIcon.classList.remove('fa-sun');
+            themeIcon.classList.add('fa-moon');
+        }
+
+        themeToggleBtn.addEventListener('click', () => {
+            body.classList.toggle('dark-theme');
+            if (body.classList.contains('dark-theme')) {
+                localStorage.setItem('theme', 'dark');
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            } else {
+                localStorage.setItem('theme', 'light');
+                themeIcon.classList.remove('fa-moon');
+                themeIcon.classList.add('fa-sun');
+            }
+        });
+
+        // Tab Switching Logic
+        function switchTab(el) {
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            document.querySelectorAll('.login-form').forEach(f => f.classList.remove('active'));
+            el.classList.add('active');
+            document.getElementById(el.getAttribute('data-target')).classList.add('active');
+            document.getElementById('error-msg').style.display = 'none';
+        }
+
+        // Login Logic
+        async function handleLogin(e, type) {
+            e.preventDefault();
+            const btn = e.target.querySelector('button');
+            const originalText = btn.innerText;
+            btn.innerText = "Authenticating...";
+            btn.disabled = true;
+
+            const identity = type === 'patron_login' ? document.getElementById('p_email').value : document.getElementById('a_user').value;
+            const pwd = type === 'patron_login' ? document.getElementById('p_pass').value : document.getElementById('a_pass').value;
+
+            try {
+                const res = await fetch('/api/auth', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({type: type, identity: identity, password: pwd})
+                });
+
+                if (res.ok) {
+                    const data = await res.json();
+                    if (type === 'patron_login') {
+                        localStorage.setItem("patron_id", data.id);
+                        localStorage.setItem("patron_name", data.name);
+                        window.location.href = "user.html";
+                    } else {
+                        localStorage.setItem("admin_user", identity);
+                        window.location.href = "admin.html";
+                    }
+                } else {
+                    const err = await res.json();
+                    document.getElementById('error-msg').innerText = err.message || "Invalid Credentials";
+                    document.getElementById('error-msg').style.display = 'block';
+                }
+            } catch (err) {
+                document.getElementById('error-msg').innerText = "Server Connection Failed";
+                document.getElementById('error-msg').style.display = 'block';
+            } finally {
+                btn.innerText = originalText;
+                btn.disabled = false;
+            }
+        }
+
+        // Scroll Animation Observer
+        document.addEventListener('DOMContentLoaded', () => {
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1
+            };
+
+            const observer = new IntersectionObserver((entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        entry.target.classList.add('visible');
+                        observer.unobserve(entry.target);
+                    }
+                });
+            }, observerOptions);
+
+            document.querySelectorAll('.fade-in-up').forEach((el) => {
+                observer.observe(el);
+            });
+            
+            // Trigger immediately for hero section elements to avoid delay
+            setTimeout(() => {
+                document.querySelectorAll('.hero .fade-in-up').forEach(el => el.classList.add('visible'));
+            }, 100);
+        });
+    </script>
+</body>
+</html>

@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>My Profile - Horizon Library</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        if(!localStorage.getItem('patron_id')) window.location.href = '/index.html';
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.body.classList.add('dark-theme');
+            }
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                if (document.body.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+    <div class="top-navbar">
+        <div class="brand">
+            <div style="background:var(--primary); padding:8px; border-radius:12px; display:flex;">📖</div>
+            Horizon <span style="color:var(--primary)">Digital</span>
+        </div>
+        <div style="display:flex; align-items:center; gap:20px;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <button onclick="goBack()" style="background:#f3f4f6; color:#374151; border:1px solid #d1d5db; padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; transition:0.3s;">← Back</button>
+            <button onclick="logout()" style="background:#fff1f2; color:#be123c; border:1px solid #fecdd3; padding:8px 16px; border-radius:10px; cursor:pointer; font-weight:700; transition:0.3s;">Logout</button>
+        </div>
+    </div>
+
+    <div class="container-main">
+        <div class="dashboard-content" style="width:100%; max-width:800px; margin:0 auto;">
+            <div style="background:white; padding:2rem; border-radius:var(--radius-md); border:1px solid var(--border);">
+                <h2 style="font-size:1.8rem; font-weight:900; color:var(--secondary); margin-bottom:2rem;">My Profile</h2>
+
+                <!-- Profile Display Section -->
+                <div id="profileDisplay" style="display:block;">
+                    <div style="display:grid; grid-template-columns: 1fr 1fr; gap:2rem; margin-bottom:2rem;">
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Full Name</label>
+                            <div id="profileName" style="font-size:1.1rem; font-weight:700; color:var(--secondary); margin-top:5px;">-</div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Email Address</label>
+                            <div id="profileEmail" style="font-size:1.1rem; font-weight:700; color:var(--secondary); margin-top:5px;">-</div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Phone Number</label>
+                            <div id="profilePhone" style="font-size:1.1rem; font-weight:700; color:var(--secondary); margin-top:5px;">-</div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Membership Type</label>
+                            <div id="profileMembership" style="font-size:1.1rem; font-weight:700; color:var(--primary); margin-top:5px;">-</div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Outstanding Fine</label>
+                            <div id="profileFine" style="font-size:1.1rem; font-weight:700; color:#dc2626; margin-top:5px;">-</div>
+                        </div>
+                        <div>
+                            <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Member Since</label>
+                            <div id="profileJoined" style="font-size:1.1rem; font-weight:700; color:var(--secondary); margin-top:5px;">-</div>
+                        </div>
+                    </div>
+
+                    <div style="margin-top:2rem; padding-top:1.5rem; border-top:1px solid var(--border);">
+                        <label style="font-size:0.75rem; font-weight:800; color:var(--text-muted); text-transform:uppercase;">Bio</label>
+                        <div id="profileBio" style="font-size:0.95rem; color:var(--text-muted); margin-top:10px; line-height:1.6;">No bio added yet</div>
+                    </div>
+
+                    <div style="margin-top:2rem; display:flex; gap:1rem;">
+                        <button onclick="editProfile()" class="btn" style="flex:1;">✏️ Edit Profile</button>
+                        <button onclick="changePassword()" class="btn" style="flex:1; background:#f3f4f6; color:var(--secondary);">🔐 Change Password</button>
+                    </div>
+                </div>
+
+                <!-- Edit Form -->
+                <div id="editForm" style="display:none;">
+                    <form onsubmit="saveProfile(event)">
+                        <div class="form-group">
+                            <label>Full Name</label>
+                            <input type="text" id="editName" required style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:1rem;">
+                        </div>
+                        <div class="form-group">
+                            <label>Phone Number</label>
+                            <input type="text" id="editPhone" required style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:1rem;">
+                        </div>
+                        <div class="form-group">
+                            <label>Bio</label>
+                            <textarea id="editBio" style="width:100%; height:100px; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:1rem; resize:vertical;"></textarea>
+                        </div>
+                        <div style="display:flex; gap:1rem; margin-top:2rem;">
+                            <button type="submit" class="btn" style="flex:1;">💾 Save Changes</button>
+                            <button type="button" class="btn" style="flex:1; background:#f3f4f6; color:var(--secondary);" onclick="cancelEdit()">❌ Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Password Change Form -->
+                <div id="passForm" style="display:none;">
+                    <form onsubmit="updatePassword(event)">
+                        <div class="form-group">
+                            <label>New Password</label>
+                            <input type="password" id="newPassword" required style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:1rem;">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="confirmPassword" required style="width:100%; padding:12px; border-radius:10px; border:1px solid var(--border); font-size:1rem;">
+                        </div>
+                        <div style="display:flex; gap:1rem; margin-top:2rem;">
+                            <button type="submit" class="btn" style="flex:1;">✅ Update Password</button>
+                            <button type="button" class="btn" style="flex:1; background:#f3f4f6; color:var(--secondary);" onclick="cancelPassChange()">❌ Cancel</button>
+                        </div>
+                    </form>
+                </div>
+
+                <div id="message" style="display:none; margin-top:1.5rem; padding:1rem; border-radius:10px; font-weight:600; text-align:center;"></div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/api.js"></script>
+    <script>
+        let studentData = null;
+
+        function goBack() {
+            window.location.href = '/user.html';
+        }
+
+        async function loadProfile() {
+            const patronId = localStorage.getItem('patron_id');
+            if (!patronId) return window.location.href = 'index.html';
+
+            try {
+                const response = await fetch(`/api/students/${patronId}`);
+                if (!response.ok) throw new Error('Failed to load profile');
+                
+                studentData = await response.json();
+                displayProfile();
+            } catch (error) {
+                showMessage('Error loading profile: ' + error.message, 'error');
+            }
+        }
+
+        function displayProfile() {
+            document.getElementById('profileName').innerText = studentData.name || '-';
+            document.getElementById('profileEmail').innerText = studentData.email || '-';
+            document.getElementById('profilePhone').innerText = studentData.phone || '-';
+            document.getElementById('profileMembership').innerText = studentData.membershipType || 'Basic';
+            document.getElementById('profileFine').innerText = '₹' + (studentData.fines || 0).toFixed(2);
+            document.getElementById('profileJoined').innerText = new Date().getFullYear();
+            document.getElementById('profileBio').innerText = studentData.bio || 'No bio added yet';
+        }
+
+        function editProfile() {
+            document.getElementById('editName').value = studentData.name;
+            document.getElementById('editPhone').value = studentData.phone;
+            document.getElementById('editBio').value = studentData.bio || '';
+            document.getElementById('profileDisplay').style.display = 'none';
+            document.getElementById('editForm').style.display = 'block';
+        }
+
+        function cancelEdit() {
+            document.getElementById('profileDisplay').style.display = 'block';
+            document.getElementById('editForm').style.display = 'none';
+        }
+
+        async function saveProfile(e) {
+            e.preventDefault();
+            const patronId = localStorage.getItem('patron_id');
+            
+            try {
+                const response = await fetch('/api/students/update-profile', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        student_id: patronId,
+                        name: document.getElementById('editName').value,
+                        phone: document.getElementById('editPhone').value,
+                        bio: document.getElementById('editBio').value
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('✅ Profile updated successfully!', 'success');
+                    setTimeout(() => loadProfile(), 1000);
+                    cancelEdit();
+                } else {
+                    showMessage('❌ Failed to update profile', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function changePassword() {
+            document.getElementById('profileDisplay').style.display = 'none';
+            document.getElementById('passForm').style.display = 'block';
+        }
+
+        function cancelPassChange() {
+            document.getElementById('profileDisplay').style.display = 'block';
+            document.getElementById('passForm').style.display = 'none';
+        }
+
+        async function updatePassword(e) {
+            e.preventDefault();
+            
+            if (document.getElementById('newPassword').value !== document.getElementById('confirmPassword').value) {
+                showMessage('❌ Passwords do not match', 'error');
+                return;
+            }
+
+            const patronId = localStorage.getItem('patron_id');
+            
+            try {
+                const response = await fetch('/api/students/update-password', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({
+                        student_id: patronId,
+                        new_password: document.getElementById('newPassword').value
+                    })
+                });
+
+                if (response.ok) {
+                    showMessage('✅ Password updated successfully!', 'success');
+                    setTimeout(() => cancelPassChange(), 1000);
+                } else {
+                    showMessage('❌ Failed to update password', 'error');
+                }
+            } catch (error) {
+                showMessage('Error: ' + error.message, 'error');
+            }
+        }
+
+        function showMessage(msg, type) {
+            const msgDiv = document.getElementById('message');
+            msgDiv.innerText = msg;
+            msgDiv.style.display = 'block';
+            msgDiv.style.background = type === 'success' ? '#dcfce7' : '#fee2e2';
+            msgDiv.style.color = type === 'success' ? '#166534' : '#991b1b';
+        }
+
+        // Load profile on page load
+        document.addEventListener('DOMContentLoaded', loadProfile);
+    </script>
+</body>
+</html>

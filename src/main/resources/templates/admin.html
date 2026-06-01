@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Horizon Library - Admin Panel</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="css/styles.css">
+    <script>
+        if(!localStorage.getItem('admin_user')) window.location.href = 'index.html';
+    </script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <script>
+        (function() {
+            const savedTheme = localStorage.getItem('theme');
+            const systemPrefersDark = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+            if (savedTheme === 'dark' || (!savedTheme && systemPrefersDark)) {
+                document.body.classList.add('dark-theme');
+            }
+        })();
+    </script>
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const themeToggleBtn = document.getElementById('theme-toggle');
+            const themeIcon = themeToggleBtn.querySelector('i');
+            
+            if (document.body.classList.contains('dark-theme')) {
+                themeIcon.classList.remove('fa-sun');
+                themeIcon.classList.add('fa-moon');
+            }
+
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-theme');
+                if (document.body.classList.contains('dark-theme')) {
+                    localStorage.setItem('theme', 'dark');
+                    themeIcon.classList.remove('fa-sun');
+                    themeIcon.classList.add('fa-moon');
+                } else {
+                    localStorage.setItem('theme', 'light');
+                    themeIcon.classList.remove('fa-moon');
+                    themeIcon.classList.add('fa-sun');
+                }
+            });
+        });
+    </script>
+    <div class="top-navbar" style="background: var(--secondary); border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <div class="brand" style="display:flex; align-items:center; gap:10px;">
+            <div style="background:var(--primary); padding:8px; border-radius:10px; display:flex;">📖</div>
+            Horizon <span style="color:var(--primary)">Admin</span>
+        </div>
+        <div style="font-size:0.9rem; opacity:0.9; display:flex; align-items:center;">
+            <button id="theme-toggle" class="theme-toggle-btn" aria-label="Toggle Theme">
+                <i class="fa-solid fa-sun"></i>
+            </button>
+            <span style="color:var(--text-muted)">Identity:</span> <span id="adminName" style="font-weight:600; color:white; margin-left:5px;"></span> 
+            <button onclick="logout()" style="background:rgba(239, 68, 68, 0.1); color:var(--danger); border:1px solid rgba(239, 68, 68, 0.2); padding:5px 12px; border-radius:6px; margin-left:15px; cursor:pointer; font-weight:600;">Logout</button>
+        </div>
+    </div>
+
+    <div class="container-main">
+        <aside class="sidebar" style="background:#f8fafc;">
+            <div style="padding:0 1rem 1.5rem; color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">Management</div>
+            <ul>
+                <li><a href="#" class="active" onclick="location.reload(); return false;" style="cursor:pointer;">Dashboard Overview</a></li>
+                <li><a href="#" onclick="window.location.href='/admin-books'; return false;" style="cursor:pointer;">📚 Manage Books</a></li>
+                <li><a href="#" onclick="window.location.href='/admin-students'; return false;" style="cursor:pointer;">👥 Manage Students</a></li>
+                <li><div style="height:1px; background:var(--border); margin:1rem 0;"></div></li>
+                <div style="padding:0 1rem 1rem; color:var(--text-muted); font-size:0.75rem; font-weight:700; text-transform:uppercase; letter-spacing:0.05em;">System</div>
+                <li><a href="#" onclick="openModal('addAdminModal'); return false;" style="cursor:pointer;">Add Sub-Admin</a></li>
+                <li><a href="#" onclick="openModal('updateAdminPassModal'); return false;" style="cursor:pointer;">Security Settings</a></li>
+            </ul>
+        </aside>
+
+        <div class="dashboard-content">
+            <div class="stats-grid">
+                <div class="stat-card"><h4>Total Books</h4><h2 id="total-books">0</h2></div>
+                <div class="stat-card"><h4>Registered Students</h4><h2 id="total-students">0</h2></div>
+                <div class="stat-card"><h4>Active Loans</h4><h2 id="books-out">0</h2></div>
+            </div>
+
+            <div class="card" id="pending-requests-card" style="display:none;">
+                <div class="card-header" style="background:#fff7ed; color:#9a3412; display:flex; justify-content:space-between;">
+                    <span>⏳ Pending Issue Requests</span>
+                    <span id="pending-count" class="badge" style="background:#fed7aa; color:#9a3412;">0</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Book</th>
+                            <th>Request Date</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="pending-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card" id="reissue-requests-card" style="display:none;">
+                <div class="card-header" style="background:#f0f9ff; color:#0369a1; display:flex; justify-content:space-between;">
+                    <span>🔄 Reissue Requests</span>
+                    <span id="reissue-count" class="badge" style="background:#bae6fd; color:#0369a1;">0</span>
+                </div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student</th>
+                            <th>Book</th>
+                            <th>Current Due</th>
+                            <th style="text-align:right;">Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="reissue-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Manage Returns & Fines</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Book ID</th>
+                            <th>Rent Date</th>
+                            <th>Due Date</th>
+                            <th>Fine Assigned</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="transactions-body"></tbody>
+                </table>
+            </div>
+
+            <div class="card">
+                <div class="card-header">Catalog & Stock</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th style="width: 50px;">Cover</th>
+                            <th>Title</th>
+                            <th>Author</th>
+                            <th>Stock Status</th>
+                            <th>eBook</th>
+                        </tr>
+                    </thead>
+                    <tbody id="books-body"></tbody>
+                </table>
+            </div>
+            
+            <div class="card">
+                <div class="card-header">Students / Users</div>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Name</th>
+                            <th>Phone</th>
+                            <th>Total Fine</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="students-body"></tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="addBookModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Add Book</h3><span class="close-btn" onclick="closeModal('addBookModal')">&times;</span></div>
+            <form onsubmit="addBook(event)">
+                <div class="form-group"><label>Title</label><input type="text" id="bookTitle" required></div>
+                <div class="form-group"><label>Author</label><input type="text" id="bookAuthor" required></div>
+                <div class="form-group"><label>Category</label><input type="text" id="bookCategory" required></div>
+                <div class="form-group"><label>Publication Year</label><input type="number" id="bookYear" value="2023" required></div>
+                <div class="form-group"><label>Description</label><textarea id="bookDesc" style="width:100%; height:80px; border-radius:8px; border:1px solid var(--border); padding:8px;"></textarea></div>
+                <div class="form-group"><label>Total Physical Copies</label><input type="number" id="bookCopies" value="1" required min="1"></div>
+                <div class="form-group"><label>Book Cover (JPG/PNG)</label><input type="file" id="bookCover" accept="image/*"></div>
+                <div class="form-group"><label>Upload eBook (PDF Optional)</label><input type="file" id="bookPdf" accept="application/pdf"></div>
+                <button type="submit" class="btn">Save Book</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="addStudentModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Register Student</h3><span class="close-btn" onclick="closeModal('addStudentModal')">&times;</span></div>
+            <form onsubmit="addStudent(event)">
+                <div class="form-group"><label>Name</label><input type="text" id="studentName" required></div>
+                <div class="form-group"><label>Email</label><input type="email" id="studentEmail" required></div>
+                <div class="form-group"><label>Phone</label><input type="text" id="studentPhone" required></div>
+                <div class="form-group"><label>Date of Birth (YYYY)</label><input type="text" id="studentDob" required></div>
+                <button type="submit" class="btn">Save & Generate User / Password</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="passUpdateModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Update Student Password</h3><span class="close-btn" onclick="closeModal('passUpdateModal')">&times;</span></div>
+            <form onsubmit="updateStudentPass(event)">
+                <input type="hidden" id="us_studentId">
+                <div class="form-group"><label>New Password</label><input type="text" id="us_newPass" required></div>
+                <button type="submit" class="btn">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="assignFineModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Assign/Decide Fine</h3><span class="close-btn" onclick="closeModal('assignFineModal')">&times;</span></div>
+            <form onsubmit="assignFine(event)">
+                <input type="hidden" id="af_studentId">
+                <div class="form-group"><label>Set New Total Fine (Rs/$)</label><input type="number" id="af_fineAmt" step="0.01" required></div>
+                <button type="submit" class="btn">Save Fine</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="addAdminModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Create Sub-Admin</h3><span class="close-btn" onclick="closeModal('addAdminModal')">&times;</span></div>
+            <form onsubmit="addAdmin(event)">
+                <div class="form-group"><label>Username</label><input type="text" id="newAdminUser" required></div>
+                <div class="form-group"><label>Password</label><input type="password" id="newAdminPass" required></div>
+                <button type="submit" class="btn">Create</button>
+            </form>
+        </div>
+    </div>
+
+    <div class="modal" id="updateAdminPassModal">
+        <div class="modal-content">
+            <div class="modal-header"><h3>Update My Admin Password</h3><span class="close-btn" onclick="closeModal('updateAdminPassModal')">&times;</span></div>
+            <form onsubmit="updateAdminPass(event)">
+                <div class="form-group"><label>New Password</label><input type="password" id="updAdminPass" required></div>
+                <button type="submit" class="btn">Update</button>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        document.getElementById('adminName').innerText = localStorage.getItem('admin_user');
+        
+        function logout() { localStorage.clear(); window.location.href = 'index.html'; }
+        function openModal(id) { document.getElementById(id).classList.add('active'); }
+        function closeModal(id) { document.getElementById(id).classList.remove('active'); }
+
+        async function fetchData() {
+            let bRes = await fetch('/api/books');
+            let books = await bRes.json();
+            document.getElementById('total-books').textContent = books.length;
+            let bBody = document.getElementById('books-body');
+            bBody.innerHTML = '';
+            books.forEach(b => {
+                bBody.innerHTML += `<tr>
+                    <td><img src="${b.cover_path || 'https://via.placeholder.com/40x50?text=No+Cover'}" style="width:40px; height:50px; object-fit:cover; border-radius:4px; border:1px solid #eee;"></td>
+                    <td>${b.title}</td>
+                    <td>${b.author}</td>
+                    <td><strong>${b.available_copies} / ${b.total_copies}</strong> Available</td>
+                    <td>${b.pdf_path ? '<span style="color:var(--success)">Yes</span>' : 'No'}</td>
+                </tr>`;
+            });
+
+            let sRes = await fetch('/api/students');
+            let students = await sRes.json();
+            document.getElementById('total-students').textContent = students.length;
+            
+            let sBody = document.getElementById('students-body');
+            sBody.innerHTML = '';
+            students.forEach(s => {
+                sBody.innerHTML += `<tr>
+                    <td>${s.id}</td>
+                    <td>${s.name}</td>
+                    <td>${s.phone}</td>
+                    <td style="color:${s.fines > 0 ? 'var(--danger)' : 'var(--text-main)'}">$${s.fines}</td>
+                    <td>
+                        <button class="btn btn-sm" onclick="openPassUpdate(${s.id})">Edit Pass</button>
+                        <button class="btn btn-sm" style="background:var(--danger)" onclick="openFineAssign(${s.id}, ${s.fines})">Manage Fine</button>
+                    </td>
+                </tr>`;
+            });
+
+            let iRes = await fetch('/api/issues');
+            let issues = await iRes.json();
+            document.getElementById('books-out').textContent = issues.filter(i => i.status === 'Issued').length;
+            let iBody = document.getElementById('transactions-body');
+            iBody.innerHTML = '';
+            issues.forEach(is => {
+                let sId = is.studentId || is.student_id;
+                let bId = is.bookId || is.book_id;
+                let student = students.find(s => s.id === sId);
+                let book = books.find(b => b.id === bId);
+                let studentName = student ? student.name : 'Student #' + sId;
+                let bookTitle = book ? book.title : 'Book #' + bId;
+                
+                let due = is.dueDate || is.due_date;
+                let rent = is.issueDate || is.issue_date;
+                due = due ? due.split(' ')[0] : 'N/A';
+                rent = rent ? rent.split(' ')[0] : 'N/A';
+                let isLate = due !== 'N/A' && new Date() > new Date(due) && is.status === 'Issued';
+                
+                iBody.innerHTML += `<tr>
+                    <td>${studentName}</td>
+                    <td>${bookTitle}</td>
+                    <td>${rent}</td>
+                    <td style="color:${isLate ? 'red' : 'inherit'}; font-weight:${isLate ? 'bold' : 'normal'}">${due} ${isLate ? '(LATE)' : ''}</td>
+                    <td>$${is.fineAmount || is.fine_amount || 0}</td>
+                    <td><span style="padding:4px 8px; border-radius:4px; background:${getStatusBg(is.status)}; color:${getStatusColor(is.status)}">${is.status}</span></td>
+                </tr>`;
+            });
+
+            // Pending Issues
+            let pIssues = issues.filter(i => i.status === 'Pending');
+            let pBody = document.getElementById('pending-body');
+            document.getElementById('pending-count').innerText = pIssues.length;
+            document.getElementById('pending-requests-card').style.display = pIssues.length > 0 ? 'block' : 'none';
+            pBody.innerHTML = '';
+            pIssues.forEach(is => {
+                let sId = is.studentId || is.student_id;
+                let bId = is.bookId || is.book_id;
+                let student = students.find(s => s.id === sId);
+                let book = books.find(b => b.id === bId);
+                let studentName = student ? student.name : 'Student #' + sId;
+                let bookTitle = book ? book.title : 'Book #' + bId;
+                let issueDateStr = is.issueDate || is.issue_date;
+
+                pBody.innerHTML += `<tr>
+                    <td><div style="font-weight:600; color:var(--secondary);">${studentName}</div><small style="color:var(--text-muted)">ID: #${sId}</small></td>
+                    <td><div style="font-weight:600;">${bookTitle}</div><small style="color:var(--text-muted)">ID: #${bId}</small></td>
+                    <td>${issueDateStr ? issueDateStr.split(' ')[0] : 'N/A'}</td>
+                    <td style="text-align:right;">
+                        <button class="btn btn-sm" onclick="approveRequest(${is.id})">Approve</button>
+                        <button class="btn btn-sm" style="background:var(--danger)" onclick="rejectRequest(${is.id})">Reject</button>
+                    </td>
+                </tr>`;
+            });
+
+            // Reissue Requests
+            let rIssues = issues.filter(i => i.status === 'Reissue-Pending');
+            let rBody = document.getElementById('reissue-body');
+            document.getElementById('reissue-count').innerText = rIssues.length;
+            document.getElementById('reissue-requests-card').style.display = rIssues.length > 0 ? 'block' : 'none';
+            rBody.innerHTML = '';
+            rIssues.forEach(is => {
+                let sId = is.studentId || is.student_id;
+                let bId = is.bookId || is.book_id;
+                let student = students.find(s => s.id === sId);
+                let book = books.find(b => b.id === bId);
+                let studentName = student ? student.name : 'Student #' + sId;
+                let bookTitle = book ? book.title : 'Book #' + bId;
+                let dueDateStr = is.dueDate || is.due_date;
+
+                rBody.innerHTML += `<tr>
+                    <td><div style="font-weight:600; color:var(--secondary);">${studentName}</div><small style="color:var(--text-muted)">ID: #${sId}</small></td>
+                    <td><div style="font-weight:600;">${bookTitle}</div><small style="color:var(--text-muted)">ID: #${bId}</small></td>
+                    <td>${dueDateStr ? dueDateStr.split(' ')[0] : 'N/A'}</td>
+                    <td style="text-align:right;">
+                        <button class="btn btn-sm" onclick="approveReissue(${is.id})">Approve Reissue</button>
+                        <button class="btn btn-sm" style="background:var(--danger)" onclick="rejectRequest(${is.id})">Reject</button>
+                    </td>
+                </tr>`;
+            });
+        }
+
+        function getStatusBg(status) {
+            switch(status) {
+                case 'Pending': return '#fff7ed';
+                case 'Issued': return '#fef3c7';
+                case 'Returned': return '#d1fae5';
+                case 'Reissue-Pending': return '#f0f9ff';
+                case 'Rejected': return '#fee2e2';
+                default: return '#f3f4f6';
+            }
+        }
+
+        function getStatusColor(status) {
+            switch(status) {
+                case 'Pending': return '#9a3412';
+                case 'Issued': return '#d97706';
+                case 'Returned': return '#059669';
+                case 'Reissue-Pending': return '#0369a1';
+                case 'Rejected': return '#991b1b';
+                default: return '#374151';
+            }
+        }
+
+        async function approveRequest(id) {
+            let res = await fetch(`/api/issues/${id}/approve`, { method: 'POST' });
+            if(res.ok) { alert("Book Issue Approved!"); fetchData(); }
+            else { let data = await res.json(); alert("Error: " + data.message); }
+        }
+
+        async function rejectRequest(id) {
+            if(!confirm("Are you sure you want to reject this request?")) return;
+            let res = await fetch(`/api/issues/${id}/reject`, { method: 'POST' });
+            if(res.ok) { alert("Request Rejected."); fetchData(); }
+        }
+
+        async function approveReissue(id) {
+            let res = await fetch(`/api/issues/${id}/reissue-approve`, { method: 'POST' });
+            if(res.ok) { alert("Reissue Approved!"); fetchData(); }
+            else { alert("Failed to approve reissue."); }
+        }
+
+        async function addBook(e) {
+            e.preventDefault();
+            const fileInput = document.getElementById('bookPdf');
+            let base64 = ""; let name = "";
+            if (fileInput.files.length > 0) {
+                name = fileInput.files[0].name;
+                base64 = await new Promise((res) => { let r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(fileInput.files[0]); });
+            }
+
+            const coverInput = document.getElementById('bookCover');
+            let coverBase64 = ""; let coverName = "";
+            if (coverInput.files.length > 0) {
+                coverName = coverInput.files[0].name;
+                coverBase64 = await new Promise((res) => { let r = new FileReader(); r.onload = () => res(r.result); r.readAsDataURL(coverInput.files[0]); });
+            }
+
+            const data = {
+                title: document.getElementById('bookTitle').value, 
+                author: document.getElementById('bookAuthor').value,
+                category: document.getElementById('bookCategory').value, 
+                total_copies: document.getElementById('bookCopies').value,
+                publication_year: document.getElementById('bookYear').value,
+                description: document.getElementById('bookDesc').value,
+                pdf_name: name, pdf_base64: base64,
+                cover_name: coverName, cover_base64: coverBase64
+            };
+            await fetch('/api/books', { method: 'POST', body: JSON.stringify(data) });
+            closeModal('addBookModal'); fetchData();
+        }
+
+        async function addStudent(e) {
+            e.preventDefault();
+            const data = {
+                name: document.getElementById('studentName').value, email: document.getElementById('studentEmail').value,
+                phone: document.getElementById('studentPhone').value, dob: document.getElementById('studentDob').value
+            };
+            let res = await fetch('/api/students', { method: 'POST', body: JSON.stringify(data) });
+            let json = await res.json();
+            alert("Student Registered!\n\nEmail/User ID: " + data.email + "\nGenerated Password: " + json.generated_password);
+            closeModal('addStudentModal'); fetchData();
+        }
+
+        function openPassUpdate(sId) { document.getElementById('us_studentId').value = sId; openModal('passUpdateModal'); }
+        async function updateStudentPass(e) {
+            e.preventDefault();
+            let sId = document.getElementById('us_studentId').value;
+            let np = document.getElementById('us_newPass').value;
+            await fetch('/api/students', { method: 'POST', body: JSON.stringify({action: 'update_password', student_id: sId, new_password: np}) });
+            alert("Password Updated!"); closeModal('passUpdateModal');
+        }
+
+        function openFineAssign(sId, current) { document.getElementById('af_studentId').value = sId; document.getElementById('af_fineAmt').value = current; openModal('assignFineModal'); }
+        async function assignFine(e) {
+            e.preventDefault();
+            let sId = document.getElementById('af_studentId').value;
+            let amt = document.getElementById('af_fineAmt').value;
+            await fetch('/api/students', { method: 'POST', body: JSON.stringify({action: 'update_fine', student_id: sId, fine: amt}) });
+            closeModal('assignFineModal'); fetchData();
+        }
+
+        async function addAdmin(e) {
+            e.preventDefault();
+            await fetch('/api/auth', { method: 'POST', body: JSON.stringify({type: 'add_admin', identity: document.getElementById('newAdminUser').value, password: document.getElementById('newAdminPass').value}) });
+            alert("Sub-Admin created"); closeModal('addAdminModal');
+        }
+
+        async function updateAdminPass(e) {
+            e.preventDefault();
+            await fetch('/api/auth', { method: 'POST', body: JSON.stringify({type: 'update_admin_password', identity: localStorage.getItem('admin_user'), password: document.getElementById('updAdminPass').value}) });
+            alert("Password updated"); closeModal('updateAdminPassModal');
+        }
+
+        window.onload = fetchData;
+    </script>
+</body>
+</html>
